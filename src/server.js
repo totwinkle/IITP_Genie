@@ -6,6 +6,7 @@ const {projects}=require('./data');
 const {search}=require('./similarity');
 const {EphemeralStubAdapter}=require('./external-adapter');
 const {htmlReport,docxReport,pdfReport}=require('./report');
+const {demoReview,rfpSummary,safeInventory}=require('./eval-materials');
 
 const app=express();
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:15*1024*1024,files:12}});
@@ -15,6 +16,10 @@ app.use(express.static(path.join(__dirname,'../public')));
 app.use('/samples',express.static(path.join(__dirname,'../samples'),{fallthrough:false}));
 app.get('/api/health',(req,res)=>res.json({ok:true,mode:'deterministic-local',records:projects.length}));
 app.get('/api/projects',(req,res)=>res.json(projects));
+app.get('/api/eval-materials',(req,res)=>{
+  res.set('Cache-Control','no-store');
+  res.json({files:safeInventory(),rfpSummary,demo:demoReview()});
+});
 app.post('/api/analyze',upload.array('documents',12),async(req,res,next)=>{try{if(!req.files?.length)return res.status(400).json({error:'분석할 파일을 선택하세요.'});const extracted=[];for(const f of req.files)extracted.push({name:f.originalname,text:await extractFile(f)});const text=extracted.map(x=>x.text).filter(Boolean).join('\n');const result=analyzeText(text,extracted.map(x=>({name:x.name,extracted:!!x.text,characters:x.text.length})));if(extracted.some(x=>!x.text))result.warnings.push('일부 파일은 텍스트를 추출하지 못했습니다. 해당 항목을 직접 확인해 주세요.');res.json(result);}catch(e){next(e);}});
 app.post('/api/search',(req,res)=>{const {proposal={},query='',manualInput=''}=req.body||{};res.json({query,candidates:search(proposal,query,manualInput),seedCount:projects.length});});
 app.post('/api/external/research',async(req,res)=>{const {url,id,password,query}=req.body||{};try{const out=await new EphemeralStubAdapter().search({url,id,password,query});res.json(out);}catch(e){res.status(400).json({error:e.message});}});
