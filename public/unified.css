@@ -1,0 +1,13 @@
+.review-summary { display: block; }
+.summary-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.unified { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+.unified article { border: 1px solid var(--line); border-radius: 7px; padding: 16px; }
+.unified h3 { margin: 0 0 13px; color: var(--navy); font-size: 15px; }
+.unified dl { margin: 0; }
+.unified dt { font-size: 11px; color: var(--muted); margin-top: 8px; }
+.unified dd { margin: 2px 0; line-height: 1.45; }
+.unified ul { list-style: none; margin: 0; padding: 0; }
+.unified li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #edf0f4; padding: 6px 0; font-size: 12px; }
+.unified p { font-size: 12px; line-height: 1.55; }
+.jump { padding: 7px 9px; margin-top: 10px; }
+@media (max-width: 800px) { .summary-metrics, .unified { grid-template-columns: 1fr; } }

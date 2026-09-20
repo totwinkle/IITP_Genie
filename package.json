@@ -1,0 +1,26 @@
+{
+  "name": "ict-rnd-pre-review-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ICT R&D Selection Evaluation Pre-review MVP",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test test/*.test.js",
+    "smoke": "node test/smoke.js"
+  },
+  "dependencies": {
+    "docx": "^9.5.1",
+    "express": "^5.1.0",
+    "jszip": "^3.10.1",
+    "mammoth": "^1.9.1",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.17.2"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0",
+    "supertest": "^7.1.4"
+  }
+}

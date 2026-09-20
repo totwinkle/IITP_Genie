@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ICT R&D 선정평가 사전검토</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/unified.css">
+</head>
+<body>
+  <header class="govbar"><div>대한민국 디지털 연구개발 행정서비스</div><div class="local">● 로컬 데모 · 외부 전송 없음</div></header>
+  <header class="masthead"><div class="brand"><div class="emblem">ICT</div><div><strong>ICT R&D 선정평가 사전검토</strong><span>Selection Evaluation Pre-review</span></div></div><button class="ghost" id="resetBtn">새 검토 시작</button></header>
+  <nav class="steps" aria-label="검토 단계">
+    <button data-target="upload" class="active"><b>1</b> 문서 분석</button><button data-target="eligibility"><b>2</b> 적격성</button><button data-target="similarity"><b>3</b> 유사과제</button><button data-target="duplicate"><b>4</b> 중복성</button><button data-target="final"><b>5</b> 통합검토</button>
+  </nav>
+  <main>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <section id="upload" class="panel hero-panel">
+      <div class="section-title"><div><span class="eyebrow">STEP 1</span><h1>신청 문서 분석</h1><p>신청서 여러 개를 한 번에 올리면 평가에 필요한 항목과 근거를 추출합니다.</p></div><span class="badge">서버 메모리 즉시 처리</span></div>
+      <div class="dropzone" id="dropzone" tabindex="0"><div class="upload-icon">⇧</div><strong>PDF, DOCX, XLSX, HWPX 파일을 끌어놓으세요</strong><span>또는 클릭하여 선택 · 파일당 15MB · 최대 12개</span><input id="files" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.hwpx,.hwp,.txt,.json,.csv" hidden></div>
+      <div id="fileList" class="file-list"></div>
+      <div class="actions"><button class="primary" id="analyzeBtn">문서 분석하기</button><a class="link-btn" href="/samples/sample-proposal.docx" download>DOCX 샘플</a><a class="link-btn" href="/samples/sample-proposal.xlsx" download>XLSX 샘플</a><a class="link-btn" href="/samples/sample-proposal.hwpx" download>HWPX 샘플</a><a class="link-btn" href="/samples/sample-proposal.pdf" download>PDF 샘플</a></div>
+      <div id="analysisWarning"></div>
+      <div id="fields" class="field-grid"></div>
+    </section>
+
+    <section id="eligibility" class="panel">
+      <div class="section-title"><div><span class="eyebrow">STEP 2</span><h2>적격성 검토</h2><p>자동 초안은 참고용입니다. 판정과 검토의견을 직접 수정하세요.</p></div><span class="badge gray">5개 기본 점검</span></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>점검항목</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="eligibilityBody"></tbody></table></div>
+    </section>
+
+    <section id="similarity" class="panel">
+      <div class="section-title"><div><span class="eyebrow">STEP 3</span><h2>기존 과제 검색</h2><p>내장된 ICT R&D 과제와 수동 입력 자료를 함께 비교합니다.</p></div><span class="badge">내장 과제 12건</span></div>
+      <details open><summary>8개 비교 관점 (수정 가능)</summary><div id="dimensionFields" class="field-grid"></div></details>
+      <label class="full"><span>검색 질의 <i>수정 가능</i></span><textarea id="query" rows="3" placeholder="분석 결과에서 검색 질의를 생성하세요."></textarea></label>
+      <div class="actions"><button class="secondary" id="generateQueryBtn">분석 결과로 질의 생성</button><button class="primary" id="searchBtn">유사과제 검색</button></div>
+      <details><summary>기존 과제 수동 추가 (JSON 또는 일반 텍스트)</summary><textarea id="manualInput" rows="7" placeholder='[{"id":"LOCAL-01","name":"과제명","objective":"목표", "technology":"기술"}]\n\n또는 과제별 일반 텍스트'></textarea></details>
+      <div id="candidateList" class="candidate-list empty-state">검색 전입니다.</div>
+      <details class="external-box"><summary>외부 연구정보 연계 데모 (선택)</summary><p class="hint">실제 외부 서비스에 접속하지 않는 인터페이스 스텁입니다. URL·ID·비밀번호는 저장되지 않으며 비밀번호는 로그에도 기록하지 않습니다.</p><div class="external-grid"><label><span>시스템 URL</span><input id="extUrl" type="url" placeholder="https://research.example.go.kr"></label><label><span>사용자 ID</span><input id="extId" autocomplete="off"></label><label><span>비밀번호</span><input id="extPassword" type="password" autocomplete="new-password"></label><button id="externalBtn" class="secondary">일회성 연결 시험</button></div><div id="externalResult" class="hint"></div></details>
+    </section>
+
+    <section id="duplicate" class="panel">
+      <div class="section-title"><div><span class="eyebrow">STEP 4</span><h2>중복성 비교·판정</h2><p>8개 비교 차원의 정량 점수와 과제별 판단을 함께 검토합니다.</p></div></div>
+      <div class="legend"><span><i class="dot high"></i>60 이상</span><span><i class="dot mid"></i>30–59</span><span><i class="dot low"></i>30 미만</span></div>
+      <div id="comparison" class="comparison empty-state">유사과제를 먼저 검색하세요.</div>
+      <label class="full conclusion"><span>중복성 종합 결론 <em>*</em></span><textarea id="conclusion" rows="5" required placeholder="중복 여부와 그 판단 근거를 작성하세요."></textarea></label>
+    </section>
+
+    <section id="final" class="panel final-panel">
+      <div class="section-title"><div><span class="eyebrow">STEP 5</span><h2>통합 검토 및 완료</h2><p>추출 결과, 적격성, 중복성 판단을 한 화면에서 확인하고 최종 의견을 남깁니다.</p></div><span id="completionBadge" class="badge gray">작성 중</span></div>
+      <div id="reviewSummary" class="review-summary"></div>
+      <div class="reviewer-grid"><label><span>검토자명 <em>*</em></span><input id="reviewerName" required></label><label><span>부서/기관 <em>*</em></span><input id="reviewerDepartment" required></label><label class="full"><span>최종 검토의견</span><textarea id="finalComment" rows="4" placeholder="평가위원에게 전달할 최종 의견"></textarea></label></div>
+      <label class="confirm"><input id="confirmReview" type="checkbox"> 모든 자동 추출 결과와 판정을 직접 확인했습니다.</label>
+      <div class="finish-bar"><button id="completeBtn" class="complete">검토 완료</button><div class="downloads"><button data-format="docx" disabled>DOCX 보고서</button><button data-format="pdf" disabled>PDF 보고서</button><button data-format="html" disabled>HTML 보고서</button></div></div>
+    </section>
+  </main>
+  <footer>ICT R&D 선정평가 사전검토 MVP · 모든 정보는 현재 브라우저 세션과 서버 처리 메모리에서만 사용됩니다.</footer>
+  <script src="/app.js"></script>
+</body></html>

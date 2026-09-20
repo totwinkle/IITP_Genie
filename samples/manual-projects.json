@@ -1,0 +1,15 @@
+[
+  {
+    "id": "LOCAL-2025-01",
+    "name": "하천 범람 디지털 예경보 서비스",
+    "institution": "지역정보진흥원",
+    "objective": "하천 수위 기반 범람 조기경보",
+    "problem": "국지성 호우의 신속한 범람 예측",
+    "technology": "IoT 수위센서, 시계열 AI",
+    "method": "센서 데이터 학습과 현장 실증",
+    "target": "지방자치단체",
+    "application": "재난안전",
+    "deliverable": "예경보 서비스, 실증 보고서",
+    "differentiation": "하천 중심 수위 모델"
+  }
+]
