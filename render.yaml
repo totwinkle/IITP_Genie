@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: ict-rnd-pre-review
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: false
