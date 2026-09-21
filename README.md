@@ -50,3 +50,14 @@ npm audit --omit=dev
 - `src/report.js`: DOCX/PDF/HTML 보고서
 - `samples/`: 업로드 예제와 수동 기존과제 JSON
 - `test/`: API·UI·전체 흐름 테스트
+
+## 배포 및 외부 검증
+
+- Docker: `docker build -t ict-rnd-pre-review . && docker run --rm -p 3000:3000 ict-rnd-pre-review`
+- Render: 저장소의 `render.yaml` 사용
+- GitHub Actions: `.github/workflows/ci.yml`에서 push·PR마다 테스트 실행
+- 배포 후 외부 점검: `node scripts/external-smoke.js https://배포주소`
+
+Notion은 Node.js 서버를 직접 실행하지 않으므로, 먼저 안정적인 HTTPS 주소로 배포한 뒤 Notion에서 `/embed` 또는 `Bookmark`로 링크를 게시합니다. 자세한 절차는 `docs/notion-publish.md`, 검증표는 `docs/external-access-test-pack.md`를 참고합니다.
+
+실제 Eval 자료 패널은 공개 UI에서 숨겨져 있으며, 통제된 테스트를 위해 API 구조만 유지합니다.
