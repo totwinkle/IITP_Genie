@@ -3,65 +3,143 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ICT R&D 선정평가 사전검토</title>
+  <meta name="description" content="ICT R&D 지원과제 문서 분석, 적격성 및 중복성 사전검토 서비스">
+  <title>ICT R&amp;D 선정평가 사전검토</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/unified.css">
 </head>
 <body>
-  <header class="govbar"><div>대한민국 디지털 연구개발 행정서비스</div><div class="local">● 로컬 데모 · 외부 전송 없음</div></header>
-  <header class="masthead"><div class="brand"><div class="emblem">ICT</div><div><strong>ICT R&D 선정평가 사전검토</strong><span>Selection Evaluation Pre-review</span></div></div><button class="ghost" id="resetBtn">새 검토 시작</button></header>
-  <nav class="steps" aria-label="검토 단계">
-    <button data-target="upload" class="active"><b>1</b> 문서 분석</button><button data-target="eligibility"><b>2</b> 적격성</button><button data-target="similarity"><b>3</b> 유사과제</button><button data-target="duplicate"><b>4</b> 중복성</button><button data-target="final"><b>5</b> 통합검토</button>
-  </nav>
-  <main>
-    <div id="notice" class="notice" role="status" hidden></div>
-    <section id="upload" class="panel hero-panel">
-      <div class="section-title"><div><span class="eyebrow">STEP 1</span><h1>신청 문서 분석</h1><p>신청서 여러 개를 한 번에 올리면 평가에 필요한 항목과 근거를 추출합니다.</p></div><span class="badge">서버 메모리 즉시 처리</span></div>
-      <div class="dropzone" id="dropzone" tabindex="0"><div class="upload-icon">⇧</div><strong>PDF, DOCX, XLSX, HWPX 파일을 끌어놓으세요</strong><span>또는 클릭하여 선택 · 파일당 15MB · 최대 12개</span><input id="files" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.hwpx,.hwp,.txt,.json,.csv" hidden></div>
-      <div id="fileList" class="file-list"></div>
-      <div class="actions"><button class="primary" id="analyzeBtn">문서 분석하기</button><a class="link-btn" href="/samples/sample-proposal.docx" download>DOCX 샘플</a><a class="link-btn" href="/samples/sample-proposal.xlsx" download>XLSX 샘플</a><a class="link-btn" href="/samples/sample-proposal.hwpx" download>HWPX 샘플</a><a class="link-btn" href="/samples/sample-proposal.pdf" download>PDF 샘플</a></div>
-      <div id="analysisWarning"></div>
-      <div id="fields" class="field-grid"></div>
+  <div class="govbar">
+    <div class="shell govbar-inner"><span class="flag-mark" aria-hidden="true"></span><span>대한민국 디지털 연구개발 행정서비스</span><span class="local">로컬 데모 · 외부 전송 없음</span></div>
+  </div>
+  <header class="masthead">
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="ICT R&D 사전검토 홈">
+        <span class="brand-iitp">IITP</span><span class="brand-divider" aria-hidden="true"></span><span class="brand-rnd">ICT R&amp;D<small>선정평가 사전검토</small></span>
+      </a>
+      <nav class="primary-nav" aria-label="주요 메뉴">
+        <a href="#guide">사전검토 안내</a><a href="#process">검토 절차</a><a href="#support">지원자료</a>
+      </nav>
+      <button class="ghost reset-button" id="resetBtn">새 검토 시작</button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="landing-hero" id="guide" aria-labelledby="hero-title">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <span class="hero-eyebrow">ICT R&amp;D SELECTION EVALUATION</span>
+          <h1 id="hero-title">지원과제의 가능성을<br>근거와 함께 검토합니다</h1>
+          <p>제출 문서를 한 번에 분석하고, 신청요건과 적격성을 점검합니다.<br class="desktop-only"> 기존 ICT R&amp;D 과제와의 유사·중복 가능성까지 근거 중심으로 비교합니다.</p>
+          <div class="hero-actions">
+            <a class="cta-primary" href="#upload">사전검토 시작 <span aria-hidden="true">→</span></a>
+            <a class="cta-secondary" href="#process">검토 절차 보기 <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="hero-note"><span aria-hidden="true">✓</span> 자동 분석 결과는 참고자료이며, 최종 판단은 담당자가 직접 확인합니다.</p>
+        </div>
+        <div class="process-visual" aria-label="사전검토 6단계 요약">
+          <div class="visual-head"><span>PRE-REVIEW FLOW</span><strong>6단계 사전검토</strong></div>
+          <ol>
+            <li><b>01</b><span>신청문서 업로드<small>다중 문서 일괄 접수</small></span></li>
+            <li><b>02</b><span>핵심정보 분석<small>항목별 근거 추출</small></span></li>
+            <li><b>03</b><span>적격성 점검<small>8개 핵심요건 확인</small></span></li>
+            <li><b>04</b><span>유사과제 검색<small>기존 ICT R&amp;D 비교</small></span></li>
+            <li><b>05</b><span>중복성 검토<small>8개 차원 정량 비교</small></span></li>
+            <li><b>06</b><span>통합검토 완료<small>검토보고서 생성</small></span></li>
+          </ol>
+          <div class="evidence-badge"><span aria-hidden="true">✓</span> 근거 중심 <i></i> 담당자 최종확인</div>
+        </div>
+      </div>
     </section>
 
-    <section id="evalMaterials" class="panel materials-panel" hidden>
-      <div class="section-title"><div><span class="eyebrow">SOURCE MATERIALS</span><h1>실제 검토자료</h1><p>/opt/data/Eval의 안전한 파일 목록과 RFP 원문에서 확인한 핵심 조건입니다.</p></div><button class="primary" id="loadEvalDemoBtn" disabled>실제 자료 데모 불러오기</button></div>
-      <div id="rfpSummary" class="rfp-summary"><div class="empty-state">검토자료를 불러오는 중입니다.</div></div>
-      <details open class="materials-inventory"><summary>자료 파일 목록 <span id="materialCount"></span></summary><div id="materialList" class="material-list"></div></details>
+    <section class="trust-strip" aria-label="서비스 지원 범위">
+      <div class="shell trust-grid">
+        <div><strong>PDF · DOCX · XLSX · HWPX</strong><span>주요 신청문서 지원</span></div>
+        <div><strong>8</strong><span>적격성 핵심 점검</span></div>
+        <div><strong>8</strong><span>유사·중복 비교 차원</span></div>
+        <div><strong>DOCX · PDF · HTML</strong><span>편집 가능한 검토보고서</span></div>
+      </div>
     </section>
 
-    <section id="eligibility" class="panel">
-      <div class="section-title"><div><span class="eyebrow">STEP 2</span><h2>적격성 검토</h2><p>실제 적격성 검토표의 핵심 항목입니다. 판정과 검토의견은 직접 수정할 수 있습니다.</p></div><span class="badge gray">8개 핵심 점검</span></div>
-      <div class="table-wrap"><table><thead><tr><th>#</th><th>점검항목</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="eligibilityBody"></tbody></table></div>
-      <div class="subsection-title"><h3>우대/감점 증빙</h3><p>제출 파일명은 증빙의 존재만 나타냅니다. 인정 여부와 감점 사유는 원문을 직접 확인하세요.</p></div>
-      <div class="table-wrap"><table><thead><tr><th>#</th><th>우대/감점 항목</th><th>증빙 파일</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="preferenceBody"></tbody></table></div>
+    <section class="process-section" id="process" aria-labelledby="process-title">
+      <div class="shell">
+        <div class="landing-heading">
+          <span class="eyebrow">REVIEW PROCESS</span>
+          <h2 id="process-title">근거를 따라 완성하는 6단계 검토</h2>
+          <p>문서 접수부터 최종 보고서까지, 각 단계의 결과를 직접 확인하고 수정할 수 있습니다.</p>
+        </div>
+        <ol class="process-cards">
+          <li><a href="#upload"><b>01</b><span class="process-icon" aria-hidden="true">↥</span><strong>문서 업로드</strong><small>신청서와 증빙자료를 한 번에 등록합니다.</small></a></li>
+          <li><a href="#upload"><b>02</b><span class="process-icon" aria-hidden="true">⌕</span><strong>핵심정보 분석</strong><small>과제정보와 항목별 근거를 추출합니다.</small></a></li>
+          <li><a href="#eligibility"><b>03</b><span class="process-icon" aria-hidden="true">✓</span><strong>적격성 점검</strong><small>핵심 요건과 우대·감점 증빙을 확인합니다.</small></a></li>
+          <li><a href="#similarity"><b>04</b><span class="process-icon" aria-hidden="true">◎</span><strong>유사과제 검색</strong><small>기존 과제와 8개 관점으로 비교합니다.</small></a></li>
+          <li><a href="#duplicate"><b>05</b><span class="process-icon" aria-hidden="true">⇄</span><strong>중복성 검토</strong><small>정량 결과와 판단 근거를 함께 검토합니다.</small></a></li>
+          <li><a href="#final"><b>06</b><span class="process-icon" aria-hidden="true">▤</span><strong>통합검토 완료</strong><small>최종 의견과 검토보고서를 생성합니다.</small></a></li>
+        </ol>
+      </div>
     </section>
 
-    <section id="similarity" class="panel">
-      <div class="section-title"><div><span class="eyebrow">STEP 3</span><h2>기존 과제 검색</h2><p>내장된 ICT R&D 과제와 수동 입력 자료를 함께 비교합니다.</p></div><span class="badge">내장 과제 12건</span></div>
-      <details open><summary>8개 비교 관점 (수정 가능)</summary><div id="dimensionFields" class="field-grid"></div></details>
-      <label class="full"><span>검색 질의 <i>수정 가능</i></span><textarea id="query" rows="3" placeholder="분석 결과에서 검색 질의를 생성하세요."></textarea></label>
-      <div class="actions"><button class="secondary" id="generateQueryBtn">분석 결과로 질의 생성</button><button class="primary" id="searchBtn">유사과제 검색</button></div>
-      <details><summary>기존 과제 수동 추가 (JSON 또는 일반 텍스트)</summary><textarea id="manualInput" rows="7" placeholder='[{"id":"LOCAL-01","name":"과제명","objective":"목표", "technology":"기술"}]\n\n또는 과제별 일반 텍스트'></textarea></details>
-      <div id="candidateList" class="candidate-list empty-state">검색 전입니다.</div>
-      <details class="external-box"><summary>외부 연구정보 연계 데모 (선택)</summary><p class="hint">실제 외부 서비스에 접속하지 않는 인터페이스 스텁입니다. URL·ID·비밀번호는 저장되지 않으며 비밀번호는 로그에도 기록하지 않습니다.</p><div class="external-grid"><label><span>시스템 URL</span><input id="extUrl" type="url" placeholder="https://research.example.go.kr"></label><label><span>사용자 ID</span><input id="extId" autocomplete="off"></label><label><span>비밀번호</span><input id="extPassword" type="password" autocomplete="new-password"></label><button id="externalBtn" class="secondary">일회성 연결 시험</button></div><div id="externalResult" class="hint"></div></details>
-    </section>
+    <section class="review-workspace" aria-labelledby="workspace-title">
+      <div class="shell workspace-intro">
+        <span class="eyebrow">PRE-REVIEW WORKSPACE</span>
+        <h2 id="workspace-title">사전검토를 시작하세요</h2>
+        <p>단계별 입력 내용은 현재 브라우저 세션에 자동 저장됩니다.</p>
+      </div>
+      <nav class="steps" aria-label="검토 단계">
+        <button data-target="upload" class="active"><b>1</b><span>문서 분석</span></button><button data-target="eligibility"><b>2</b><span>적격성</span></button><button data-target="similarity"><b>3</b><span>유사과제</span></button><button data-target="duplicate"><b>4</b><span>중복성</span></button><button data-target="final"><b>5</b><span>통합검토</span></button>
+      </nav>
+      <div class="workspace-shell shell">
+        <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+        <section id="upload" class="panel hero-panel">
+          <div class="section-title"><div><span class="step-label">01 · DOCUMENT ANALYSIS</span><h2>신청 문서 분석</h2><p>신청서와 증빙자료를 올리면 평가에 필요한 항목과 원문 근거를 추출합니다.</p></div><span class="badge">서버 메모리 즉시 처리</span></div>
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="검토할 문서 파일 선택"><div class="upload-icon" aria-hidden="true">↥</div><strong>검토할 문서를 여기에 끌어놓으세요</strong><span>PDF, DOCX, XLSX, HWPX · 파일당 15MB · 최대 12개</span><span class="upload-prompt">또는 파일 선택</span><input id="files" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.hwpx,.hwp,.txt,.json,.csv" hidden></div>
+          <div id="fileList" class="file-list" aria-live="polite"></div>
+          <div class="actions" id="support"><button class="primary" id="analyzeBtn">문서 분석하기</button><span class="sample-label">샘플 내려받기</span><a class="link-btn" href="/samples/sample-proposal.docx" download>DOCX</a><a class="link-btn" href="/samples/sample-proposal.xlsx" download>XLSX</a><a class="link-btn" href="/samples/sample-proposal.hwpx" download>HWPX</a><a class="link-btn" href="/samples/sample-proposal.pdf" download>PDF</a></div>
+          <div id="analysisWarning"></div>
+          <div id="fields" class="field-grid"></div>
+        </section>
 
-    <section id="duplicate" class="panel">
-      <div class="section-title"><div><span class="eyebrow">STEP 4</span><h2>중복성 비교·판정</h2><p>8개 비교 차원의 정량 점수와 과제별 판단을 함께 검토합니다.</p></div></div>
-      <div class="legend"><span><i class="dot high"></i>60 이상</span><span><i class="dot mid"></i>30–59</span><span><i class="dot low"></i>30 미만</span></div>
-      <div id="comparison" class="comparison empty-state">유사과제를 먼저 검색하세요.</div>
-      <label class="full conclusion"><span>중복성 종합 결론 <em>*</em></span><textarea id="conclusion" rows="5" required placeholder="중복 여부와 그 판단 근거를 작성하세요."></textarea></label>
-    </section>
+        <section id="evalMaterials" class="panel materials-panel" hidden>
+          <div class="section-title"><div><span class="eyebrow">SOURCE MATERIALS</span><h2>실제 검토자료</h2><p>/opt/data/Eval의 안전한 파일 목록과 RFP 원문에서 확인한 핵심 조건입니다.</p></div><button class="primary" id="loadEvalDemoBtn" disabled>실제 자료 데모 불러오기</button></div>
+          <div id="rfpSummary" class="rfp-summary"><div class="empty-state">검토자료를 불러오는 중입니다.</div></div>
+          <details open class="materials-inventory"><summary>자료 파일 목록 <span id="materialCount"></span></summary><div id="materialList" class="material-list"></div></details>
+        </section>
 
-    <section id="final" class="panel final-panel">
-      <div class="section-title"><div><span class="eyebrow">STEP 5</span><h2>통합 검토 및 완료</h2><p>추출 결과, 적격성, 중복성 판단을 한 화면에서 확인하고 최종 의견을 남깁니다.</p></div><span id="completionBadge" class="badge gray">작성 중</span></div>
-      <div id="reviewSummary" class="review-summary"></div>
-      <div class="reviewer-grid"><label><span>검토자명 <em>*</em></span><input id="reviewerName" required></label><label><span>부서/기관 <em>*</em></span><input id="reviewerDepartment" required></label><label class="full"><span>최종 검토의견</span><textarea id="finalComment" rows="4" placeholder="평가위원에게 전달할 최종 의견"></textarea></label></div>
-      <label class="confirm"><input id="confirmReview" type="checkbox"> 모든 자동 추출 결과와 판정을 직접 확인했습니다.</label>
-      <div class="finish-bar"><button id="completeBtn" class="complete">검토 완료</button><div class="downloads"><button data-format="docx" disabled>DOCX 보고서</button><button data-format="pdf" disabled>PDF 보고서</button><button data-format="html" disabled>HTML 보고서</button></div></div>
+        <section id="eligibility" class="panel">
+          <div class="section-title"><div><span class="step-label">02 · ELIGIBILITY REVIEW</span><h2>적격성 검토</h2><p>핵심 점검항목별 판정과 검토의견을 확인하고 직접 수정할 수 있습니다.</p></div><span class="badge gray">8개 핵심 점검</span></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>점검항목</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="eligibilityBody"></tbody></table></div>
+          <div class="subsection-title"><h3>우대/감점 증빙</h3><p>제출 파일명은 증빙의 존재만 나타냅니다. 인정 여부와 감점 사유는 원문을 직접 확인하세요.</p></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>우대/감점 항목</th><th>증빙 파일</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="preferenceBody"></tbody></table></div>
+        </section>
+
+        <section id="similarity" class="panel">
+          <div class="section-title"><div><span class="step-label">03 · PROJECT SEARCH</span><h2>기존 과제 검색</h2><p>내장된 ICT R&amp;D 과제와 수동 입력 자료를 8개 관점으로 함께 비교합니다.</p></div><span class="badge">내장 과제 12건</span></div>
+          <details open><summary>8개 비교 관점 (수정 가능)</summary><div id="dimensionFields" class="field-grid"></div></details>
+          <label class="full query-field"><span>검색 질의 <i>수정 가능</i></span><textarea id="query" rows="3" placeholder="분석 결과에서 검색 질의를 생성하세요."></textarea></label>
+          <div class="actions"><button class="secondary" id="generateQueryBtn">분석 결과로 질의 생성</button><button class="primary" id="searchBtn">유사과제 검색</button></div>
+          <details><summary>기존 과제 수동 추가 (JSON 또는 일반 텍스트)</summary><textarea id="manualInput" rows="7" placeholder='[{"id":"LOCAL-01","name":"과제명","objective":"목표", "technology":"기술"}]&#10;&#10;또는 과제별 일반 텍스트'></textarea></details>
+          <div id="candidateList" class="candidate-list empty-state">검색 전입니다.</div>
+          <details class="external-box"><summary>외부 연구정보 연계 데모 (선택)</summary><p class="hint">실제 외부 서비스에 접속하지 않는 인터페이스 스텁입니다. URL·ID·비밀번호는 저장되지 않으며 비밀번호는 로그에도 기록하지 않습니다.</p><div class="external-grid"><label><span>시스템 URL</span><input id="extUrl" type="url" placeholder="https://research.example.go.kr"></label><label><span>사용자 ID</span><input id="extId" autocomplete="off"></label><label><span>비밀번호</span><input id="extPassword" type="password" autocomplete="new-password"></label><button id="externalBtn" class="secondary">일회성 연결 시험</button></div><div id="externalResult" class="hint"></div></details>
+        </section>
+
+        <section id="duplicate" class="panel">
+          <div class="section-title"><div><span class="step-label">04 · DUPLICATION REVIEW</span><h2>중복성 비교·판정</h2><p>8개 비교 차원의 정량 점수와 과제별 판단을 함께 검토합니다.</p></div></div>
+          <div class="legend"><span><i class="dot high"></i>60 이상</span><span><i class="dot mid"></i>30–59</span><span><i class="dot low"></i>30 미만</span></div>
+          <div id="comparison" class="comparison empty-state">유사과제를 먼저 검색하세요.</div>
+          <label class="full conclusion"><span>중복성 종합 결론 <em>*</em></span><textarea id="conclusion" rows="5" required placeholder="중복 여부와 그 판단 근거를 작성하세요."></textarea></label>
+        </section>
+
+        <section id="final" class="panel final-panel">
+          <div class="section-title"><div><span class="step-label">05 · FINAL REVIEW</span><h2>통합 검토 및 완료</h2><p>추출 결과, 적격성, 중복성 판단을 확인하고 최종 검토의견을 남깁니다.</p></div><span id="completionBadge" class="badge gray">작성 중</span></div>
+          <div id="reviewSummary" class="review-summary"></div>
+          <div class="reviewer-grid"><label><span>검토자명 <em>*</em></span><input id="reviewerName" required></label><label><span>부서/기관 <em>*</em></span><input id="reviewerDepartment" required></label><label class="full"><span>최종 검토의견</span><textarea id="finalComment" rows="4" placeholder="평가위원에게 전달할 최종 의견"></textarea></label></div>
+          <label class="confirm"><input id="confirmReview" type="checkbox"> 모든 자동 추출 결과와 판정을 직접 확인했습니다.</label>
+          <div class="finish-bar"><button id="completeBtn" class="complete">검토 완료</button><div class="downloads"><button data-format="docx" disabled>DOCX 보고서</button><button data-format="pdf" disabled>PDF 보고서</button><button data-format="html" disabled>HTML 보고서</button></div></div>
+        </section>
+      </div>
     </section>
   </main>
-  <footer>ICT R&D 선정평가 사전검토 MVP · 모든 정보는 현재 브라우저 세션과 서버 처리 메모리에서만 사용됩니다.</footer>
+  <footer><div class="shell footer-inner"><div><strong>IITP <span>/</span> ICT R&amp;D</strong><p>ICT R&amp;D 선정평가 사전검토 MVP</p></div><p>본 서비스는 공공 R&amp;D 사전검토를 지원하는 데모이며 특정 기관의 공식 서비스가 아닙니다.<br>모든 정보는 현재 브라우저 세션과 서버 처리 메모리에서만 사용됩니다.</p></div></footer>
   <script src="/app.js"></script>
-</body></html>
+</body>
+</html>
