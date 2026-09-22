@@ -1,5 +1,9 @@
 const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = require('docx');
 const PDFDocument = require('pdfkit');
+const fs = require('fs');
+
+const PDF_FONT_CANDIDATES=[process.env.PDF_FONT_PATH,'/usr/share/fonts/opentype/unifont/unifont_jp.otf','/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'].filter(Boolean);
+const PDF_FONT=PDF_FONT_CANDIDATES.find(fs.existsSync);
 
 const LABELS={projectName:'과제명',institution:'주관기관',pi:'연구책임자',period:'연구기간',purpose:'연구목적',contents:'연구내용',coreTechnology:'핵심기술',keywords:'키워드',finalGoal:'최종목표',deliverables:'성과물'};
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -15,6 +19,6 @@ async function docxReport(review) {
   return Packer.toBuffer(new Document({sections:[{children}]}));
 }
 function pdfReport(review) {
-  const r=model(review); return new Promise(resolve=>{const doc=new PDFDocument({margin:48,size:'A4'});const chunks=[];doc.on('data',c=>chunks.push(c));doc.on('end',()=>resolve(Buffer.concat(chunks)));doc.font('/usr/share/fonts/opentype/unifont/unifont_jp.otf').fontSize(19).text('ICT R&D 선정평가 사전검토 보고서').moveDown();doc.fontSize(9).fillColor('#667085').text(`생성일시 ${r.completedAt} · 평가위원 판단 지원용`).fillColor('#17233c');doc.fontSize(14).moveDown().text('1. 신청과제');doc.fontSize(10);Object.entries(LABELS).forEach(([k,l])=>doc.text(`${l}: ${r.fields[k]?.value||r.fields[k]||'확인 필요'}`));doc.fontSize(14).moveDown().text('2. 적격성 검토');doc.fontSize(10);r.eligibility.forEach(x=>doc.text(`• ${x.item} [${x.status}] ${x.note||''}`));doc.fontSize(14).moveDown().text('3. 중복성 검토');doc.fontSize(10);r.duplicateReviews.forEach(x=>doc.text(`• ${x.name} (${x.similarity}%) [${x.status}] ${x.note||''}`));doc.fontSize(14).moveDown().text('4. 종합결론');doc.fontSize(10).text(r.conclusion||'');doc.fontSize(14).moveDown().text('5. 최종 검토자');doc.fontSize(10).text(`${r.reviewer.name||''} / ${r.reviewer.department||''}`).text(r.reviewer.finalComment||'');doc.end();});
+  const r=model(review); return new Promise(resolve=>{const doc=new PDFDocument({margin:48,size:'A4'});const chunks=[];doc.on('data',c=>chunks.push(c));doc.on('end',()=>resolve(Buffer.concat(chunks)));if(PDF_FONT)doc.font(PDF_FONT);doc.fontSize(19).text('ICT R&D 선정평가 사전검토 보고서').moveDown();doc.fontSize(9).fillColor('#667085').text(`생성일시 ${r.completedAt} · 평가위원 판단 지원용`).fillColor('#17233c');doc.fontSize(14).moveDown().text('1. 신청과제');doc.fontSize(10);Object.entries(LABELS).forEach(([k,l])=>doc.text(`${l}: ${r.fields[k]?.value||r.fields[k]||'확인 필요'}`));doc.fontSize(14).moveDown().text('2. 적격성 검토');doc.fontSize(10);r.eligibility.forEach(x=>doc.text(`• ${x.item} [${x.status}] ${x.note||''}`));doc.fontSize(14).moveDown().text('3. 중복성 검토');doc.fontSize(10);r.duplicateReviews.forEach(x=>doc.text(`• ${x.name} (${x.similarity}%) [${x.status}] ${x.note||''}`));doc.fontSize(14).moveDown().text('4. 종합결론');doc.fontSize(10).text(r.conclusion||'');doc.fontSize(14).moveDown().text('5. 최종 검토자');doc.fontSize(10).text(`${r.reviewer.name||''} / ${r.reviewer.department||''}`).text(r.reviewer.finalComment||'');doc.end();});
 }
 module.exports={htmlReport,docxReport,pdfReport};
