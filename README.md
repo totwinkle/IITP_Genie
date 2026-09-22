@@ -2,16 +2,34 @@
 
 ICT R&D 신청 문서를 로컬에서 분석하고 적격성·중복성을 검토한 뒤 편집 가능한 보고서를 만드는 실행형 데모입니다. 외부 API나 API 키가 필요하지 않습니다.
 
-## 실행
+## 실행 방식
 
-Node.js 20 이상이 필요합니다.
+### 로컬 실행
+
+`localhost:3000`은 이 저장소를 내려받아 **사용자의 컴퓨터에서 Node.js 서버를 직접 실행할 때만** 사용하는 주소입니다.
 
 ```bash
-npm install
+npm ci
 npm start
 ```
 
-브라우저에서 <http://localhost:3000>을 엽니다. `samples/`의 PDF, DOCX, XLSX, HWPX 예제 파일을 곧바로 업로드할 수 있습니다.
+그 후 같은 컴퓨터의 브라우저에서 `http://localhost:3000`을 엽니다.
+
+### 외부 공개 실행
+
+GitHub 저장소 주소만으로는 웹앱이 실행되지 않습니다. 외부 사용자는 Render 등 Node.js 호스팅 서비스에 배포된 HTTPS 주소로 접속해야 합니다.
+
+1. Render에서 `totwinkle/IITP_Genie` 저장소를 연결합니다.
+2. 저장소의 `render.yaml` 설정으로 Web Service를 생성합니다.
+3. 배포가 끝나면 생성된 `https://...onrender.com` 주소를 사용합니다.
+4. 배포 주소에서 `GET /api/health`가 `ok: true`인지 확인합니다.
+5. 그 검증된 HTTPS 주소를 Notion의 `/embed` 또는 `Bookmark`로 게시합니다.
+
+배포 후 외부 검증:
+
+```bash
+node scripts/external-smoke.js https://배포주소
+```
 
 ## 데모 흐름
 
