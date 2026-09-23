@@ -215,11 +215,11 @@ function analyzeDocuments(documents) {
       if (field.confidence <= result.fields[key].confidence) continue;
       field.evidenceDetails = field.evidenceDetails.map(d => ({...d, source:doc.name}));
       const pages = [...new Set(field.evidenceDetails.map(d => d.page).filter(Boolean))];
-      field.evidence = `${doc.name}${pages.length ? ` · p. ${pages.join(', ')}` : ''} · ${field.evidence}`;
+      field.evidence = `${doc.category ? `${doc.category} · ` : ''}${doc.name}${pages.length ? ` · p. ${pages.join(', ')}` : ''} · ${field.evidence}`;
       result.fields[key] = field;
     }
     result.textLength += doc.text.length;
-    result.sourceFiles.push({name:doc.name, extracted:!!doc.text, characters:doc.text.length});
+    result.sourceFiles.push({name:doc.name,category:doc.category||'기타',extracted:!!doc.text,characters:doc.text.length});
     result.warnings.push(...(doc.warnings || []));
     if (!doc.text) result.warnings.push(`${doc.name}: 텍스트를 추출하지 못했습니다. 해당 항목을 직접 확인해 주세요.`);
   }

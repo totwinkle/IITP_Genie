@@ -30,10 +30,11 @@ app.get('/api/eval-materials',(req,res)=>{
 app.post('/api/analyze',upload.array('documents',12),async(req,res,next)=>{
   try {
     if(!req.files?.length)return res.status(400).json({error:'분석할 파일을 선택하세요.'});
+    const categories=(()=>{try{return JSON.parse(req.body.documentCategories||'[]');}catch{return [];}})();
     const documents=[];
-    for(const file of req.files){
+    for(const [index,file] of req.files.entries()){
       file.originalname=decodeOriginalName(file.originalname);
-      documents.push({name:file.originalname,...await extractDocument(file)});
+      documents.push({name:file.originalname,category:categories[index]||'기타',...await extractDocument(file)});
     }
     res.json(analyzeDocuments(documents));
   } catch(e){next(e);}
