@@ -1,4 +1,5 @@
 const path = require('path');
+const {analyzePreferences,isPreferenceEvidence} = require('./preference-analyzer');
 const JSZip = require('jszip');
 const mammoth = require('mammoth');
 const pdfParse = require('pdf-parse');
@@ -235,7 +236,7 @@ function analyzeDocuments(documents) {
     for (const block of blocks) for (const text of block.text.split('\n')) {
       lines.push({text:text.trim(), line:lines.length+1, page:block.page});
     }
-    const fields = analyzeLines(lines);
+    const fields = isPreferenceEvidence(doc) || category === '가점사항 증빙서류' ? analyzeLines([]) : analyzeLines(lines);
     for (const [key,field] of Object.entries(fields)) {
       if (!field.confidence) continue;
       const priority = categoryPriority(category, key);
@@ -255,6 +256,7 @@ function analyzeDocuments(documents) {
     result.warnings.push(...(doc.warnings || []));
     if (!doc.text) result.warnings.push(`${doc.name}: 텍스트를 추출하지 못했습니다. 해당 항목을 직접 확인해 주세요.`);
   }
+  result.preferenceAnalysis = analyzePreferences(documents);
   return result;
 }
-module.exports = { extractFile, extractDocument, analyzeText, analyzeDocuments, cleanText };
+module.exports = { analyzePreferences, extractFile, extractDocument, analyzeText, analyzeDocuments, cleanText };

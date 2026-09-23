@@ -27,3 +27,19 @@ test('UI labels inferred fields with confidence and source evidence, including l
  assert.equal(w.document.querySelector('[data-field="institution"]').value,'기관');
  dom.window.close();
 });
+
+test('preference opinions render before editable final selections with source and confidence',()=>{
+ const dom=new JSDOM(fs.readFileSync('public/index.html','utf8'),{url:'http://localhost/',runScripts:'outside-only'});
+ const w=dom.window;
+ const preferenceAnalysis=require('../src/analyzer').analyzePreferences([{name:'evidence.pdf',category:'가점사항 증빙서류',text:'기술이전 계약 체결 완료 <img src=x>',pages:[{page:5,text:'기술이전 계약 체결 완료 <img src=x>'}]}]);
+ w.sessionStorage.setItem('ict-review-state',JSON.stringify({preferenceAnalysis}));
+ w.eval(fs.readFileSync('public/assist.js','utf8'));w.eval(fs.readFileSync('public/app.js','utf8'));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+ const row=w.document.querySelector('#preferenceBody tr');const opinion=row.querySelector('.preference-ai-rationale');const select=row.querySelector('select');
+ assert.match(opinion.textContent,/본문 근거 확인/);assert.match(opinion.textContent,/evidence.pdf · p. 5/);assert.match(opinion.textContent,/85%/);assert.equal(row.querySelector('img'),null);
+ assert.ok(opinion.compareDocumentPosition(select)&w.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert.equal(select.value,'확인 필요');select.value='불인정';select.dispatchEvent(new w.Event('input'));
+ assert.equal(w.IctReview.getState().preferenceEvidence[0].status,'불인정');
+ assert.equal(JSON.parse(w.sessionStorage.getItem('ict-review-state')).preferenceEvidence[0].status,'불인정');
+ assert.match(w.document.querySelectorAll('.preference-ai-rationale')[1].textContent,/증빙 근거 부족/);
+ dom.window.close();
+});

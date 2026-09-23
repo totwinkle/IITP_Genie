@@ -36,7 +36,8 @@ app.post('/api/analyze',upload.array('documents',12),async(req,res,next)=>{
       file.originalname=decodeOriginalName(file.originalname);
       documents.push({name:file.originalname,category:categories[index]||'기타',...await extractDocument(file)});
     }
-    res.json(analyzeDocuments(documents));
+    const {referenceDocuments, ...analysis} = analyzeDocuments(documents);
+    res.json(analysis);
   } catch(e){next(e);}
 });
 app.post('/api/search',(req,res)=>{const {proposal={},query='',manualInput=''}=req.body||{};res.json({query,candidates:search(proposal,query,manualInput),seedCount:projects.length});});
