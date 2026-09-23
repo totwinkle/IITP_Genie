@@ -163,13 +163,31 @@ function inferFields(fields) {
   infer('keywords', selected.map(x => x.term).join(', '), [...new Set(selected.flatMap(x => x.details))], 0.6);
 }
 
+// Instructions are not applicant evidence, even when placed under a field label.
+const templateText = /D\s*(?:[+＋]\s*(?:N|\d+))?\s*년|[~～_]{3,}|수행\s*주체|작성|안내|기재|입력\s*(?:하세요|하시오|방법)|예시|목차/i;
+function periodQuality(text) {
+  if (templateText.test(text)) return 0;
+  if (/(?:19|20)\d{2}\s*(?:[.\/-]|년|~|～|–|—|부터|까지|$)/.test(text)) return 2;
+  if (/\d+\s*(?:개월|개년|년간|년|월)/.test(text)) return 1;
+  return 0;
+}
+function categoryPriority(category, field) {
+  if (category === '사업계획서') return 3;
+  if (field === 'period' && category === 'RFP') return 2;
+  if (category === '기타') return field === 'period' ? 1 : 2;
+  return 0;
+}
+
 function analyzeLines(lines) {
   const fields = Object.fromEntries(Object.keys(FIELD_RULES).map(k => [k, missing()]));
   function add(field, selected, type, confidence, section) {
-    const useful = selected.filter(x => x.text.trim() && !/작성요령|기재하세요|입력하세요/.test(x.text));
+    const useful = selected.filter(x => x.text.trim() && !templateText.test(x.text) &&
+      (field !== 'period' || periodQuality(x.text)));
     const value = useful.map(x => x.text).join('\n').trim();
     if (!value || /^(?:확인 필요|미정|미기재|N\/A|[-—])$/i.test(value)) return;
-    if (fields[field].confidence >= confidence) return;
+    const quality = field === 'period' ? periodQuality(value) : 0;
+    const previousQuality = field === 'period' ? periodQuality(fields[field].value) : 0;
+    if (previousQuality > quality || (previousQuality === quality && fields[field].confidence >= confidence)) return;
     const details = useful.map(x => ({text:x.text, line:x.line, ...(x.page ? {page:x.page} : {})}));
     fields[field] = { value, evidence: `${type === 'contextual' ? '문맥 연결 · ' : ''}“${value}”`, confidence, evidenceType:type,
       ...(section ? {section} : {}), evidenceDetails:details };
@@ -204,7 +222,14 @@ function analyzeDocuments(documents) {
   const result = analyzeText('');
   result.warnings = [];
   result.textLength = 0;
+  // Keep original requirements (including templates) available for eligibility comparison.
+  result.referenceDocuments = [];
+  const priorities = {};
   for (const doc of documents) {
+    const category = doc.category || '기타';
+    if (category === 'RFP' || category === '공고문') {
+      result.referenceDocuments.push({name:doc.name, category, text:doc.text, pages:doc.pages || []});
+    }
     const lines = [];
     const blocks = doc.pages?.length ? doc.pages : [{text:doc.text}];
     for (const block of blocks) for (const text of block.text.split('\n')) {
@@ -212,11 +237,18 @@ function analyzeDocuments(documents) {
     }
     const fields = analyzeLines(lines);
     for (const [key,field] of Object.entries(fields)) {
-      if (field.confidence <= result.fields[key].confidence) continue;
-      field.evidenceDetails = field.evidenceDetails.map(d => ({...d, source:doc.name}));
+      if (!field.confidence) continue;
+      const priority = categoryPriority(category, key);
+      const previous = result.fields[key];
+      if (previous.confidence && (priority < priorities[key] ||
+        (priority === priorities[key] && (key === 'period' && periodQuality(field.value) !== periodQuality(previous.value)
+          ? periodQuality(field.value) < periodQuality(previous.value)
+          : field.confidence <= previous.confidence)))) continue;
+      field.evidenceDetails = field.evidenceDetails.map(d => ({...d, source:doc.name, category}));
       const pages = [...new Set(field.evidenceDetails.map(d => d.page).filter(Boolean))];
-      field.evidence = `${doc.category ? `${doc.category} · ` : ''}${doc.name}${pages.length ? ` · p. ${pages.join(', ')}` : ''} · ${field.evidence}`;
+      field.evidence = `${category} · ${doc.name} · ${pages.length ? `p. ${pages.join(', ')}` : '페이지 확인 불가'} · ${field.evidence}`;
       result.fields[key] = field;
+      priorities[key] = priority;
     }
     result.textLength += doc.text.length;
     result.sourceFiles.push({name:doc.name,category:doc.category||'기타',extracted:!!doc.text,characters:doc.text.length});

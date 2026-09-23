@@ -141,3 +141,55 @@ test('direct fields retain priority and inference never combines separate docume
   const out = analyzeDocuments([{name:'a',text:'과제명: 양자 센서'}, {name:'b',text:'핵심기술: 양자 센서'}]);
   assert.equal(out.fields.keywords.value, '확인 필요');
 });
+
+test('screenshot regression: proposal evidence beats announcement and RFP templates in either upload order', () => {
+  const announcement = {name:'공고.pdf', category:'공고문', text:'연구기간: D년 ~ D+N년\n연구목적: 사업 목적에 맞게 작성하세요\n연구내용: 수행주체별 내용을 기재하세요', pages:[]};
+  const proposal = {name:'신청.pdf', category:'사업계획서', text:'연구기간\n2026.04 ~ 2028.12 (33개월)\n연구목적\n현장 재난 대응을 지원한다.\n연구내용\n센서 융합 모델을 검증한다.', pages:[{page:7,text:'연구기간\n2026.04 ~ 2028.12 (33개월)\n연구목적\n현장 재난 대응을 지원한다.\n연구내용\n센서 융합 모델을 검증한다.'}]};
+  const rfp = {name:'요구사항.txt',category:'RFP',text:'연구목적: 공통 기술 개발\n연구기간: 36개월'};
+  for (const documents of [[announcement,rfp,proposal],[proposal,rfp,announcement]]) {
+    const result = analyzeDocuments(documents);
+    assert.equal(result.fields.period.value,'2026.04 ~ 2028.12 (33개월)');
+    assert.equal(result.fields.purpose.value,'현장 재난 대응을 지원한다.');
+    assert.equal(result.fields.contents.value,'센서 융합 모델을 검증한다.');
+    for (const key of ['period','purpose','contents']) {
+      const field = result.fields[key];
+      assert.equal(field.confidence,0.9);
+      assert.match(field.evidence,/사업계획서 · 신청.pdf · p\. 7/);
+      assert.ok(field.evidence.includes(field.value));
+      assert.equal(field.evidenceDetails[0].category,'사업계획서');
+      assert.equal(field.evidenceDetails[0].source,'신청.pdf');
+      assert.equal(field.evidenceDetails[0].page,7);
+    }
+    assert.deepEqual(result.referenceDocuments.find(d=>d.category==='공고문'),announcement);
+    assert.equal(result.referenceDocuments.find(d=>d.category==='RFP').text,rfp.text);
+  }
+});
+
+test('all applicant fields rank proposal, other, then requirements before confidence', () => {
+  const labels = {projectName:'과제명',institution:'주관기관',pi:'연구책임자',purpose:'연구목적',contents:'연구내용',coreTechnology:'핵심기술',keywords:'키워드',finalGoal:'최종목표',deliverables:'성과물'};
+  for (const [key,label] of Object.entries(labels)) {
+    const documents = ['공고문','RFP','기타','사업계획서'].map(category=>({name:category+'.txt',category,text:`${label}${category==='사업계획서'?'\n':': '}${category} 실제 값`}));
+    assert.equal(analyzeDocuments(documents).fields[key].value,'사업계획서 실제 값',key);
+    assert.equal(analyzeDocuments(documents.slice(0,3)).fields[key].value,'기타 실제 값',key);
+    assert.notEqual(analyzeDocuments(documents.slice(0,2)).fields[key].value,'확인 필요',key);
+  }
+  const {fields} = analyzeDocuments([{name:'a',category:'RFP',text:'연구목적: 명시된 공통 목표'}, {name:'b',category:'사업계획서',text:'본 연구는 재난 피해 저감을 목적으로 한다.'}]);
+  assert.equal(fields.purpose.evidenceType,'contextual');
+  assert.equal(fields.purpose.confidence,0.7);
+});
+
+test('template-only evidence remains missing and concrete period evidence wins within a document', () => {
+  for (const category of ['사업계획서','기타','RFP','공고문']) {
+    for (const period of ['D년','D+N년','D+2년','~~~~~','수행주체별 36개월','2026년부터 작성 안내','협약 시 결정']) {
+      const {fields} = analyzeDocuments([{name:'template.txt',category,text:`연구기간: ${period}\n연구목적: 연구 목적 작성\n연구내용: 수행주체별 내용 안내`}]);
+      for (const key of ['period','purpose','contents','deliverables','keywords']) {
+        assert.equal(fields[key].value,'확인 필요',`${category}: ${period}: ${key}`);
+        assert.equal(fields[key].confidence,0);
+      }
+    }
+  }
+  const {fields} = analyzeDocuments([{name:'rfp.txt',category:'RFP',text:'연구기간: D년 ~ D+N년\n연구기간: 36개월\n연구기간\n2026.01 ~ 2028.12'}]);
+  assert.equal(fields.period.value,'2026.01 ~ 2028.12');
+  assert.equal(fields.period.confidence,0.9);
+  assert.match(fields.period.evidence,/RFP · rfp.txt · 페이지 확인 불가/);
+});
