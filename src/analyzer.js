@@ -111,6 +111,58 @@ function contextualField(text) {
   if (/(?:본 연구에서는|본 과제에서는).*(?:설계|구현|분석|개발|검증)한다/.test(text)) return 'contents';
   return null;
 }
+// Fallbacks copy document wording; they never generate a new goal or product.
+const inferenceNoise = /예시|작성요령|기재|입력|확인 필요|미정|미기재|언급|목차|없음|없다|아니|않|제외|검토|가능성|여부|기존|타 기관/;
+const intent = /개발|구축|구현|제작|제공|제출|완성|확보|달성|향상|개선|저감|지원|실증/;
+const output = /시제품|제품|시스템|소프트웨어|플랫폼|데이터셋|보고서|산출물|성과물|결과물|프로토타입|모듈|애플리케이션|앱\b|\b(?:software|platform|system|prototype|dataset)\b/i;
+const keywordStops = new Set(('본 본연구 본과제 연구 과제 연구개발 개발 구축 구현 제작 제공 제출 완성 확보 달성 향상 개선 저감 지원 실증 분석 설계 검증 수행 최종 목표 목적 내용 주요 핵심 기술 기반 활용 통한 위한 통해 위해 및 또는 등 관련 결과 성과 성과물 산출물 결과물 시스템 소프트웨어 플랫폼 제품 시제품 보고서 서비스 사업 한다 하고 하여 대한 있는 위한 이를 the and for with from this that system platform software project research development').split(' '));
+function inferFields(fields) {
+  const records = keys => keys.flatMap(sourceField => fields[sourceField].evidenceDetails.map(d => ({...d, sourceField})))
+    .filter(d => !inferenceNoise.test(d.text));
+  const sentences = keys => records(keys).flatMap(d => d.text.split(/(?<=[.!?])\s+|[;；]/).map(text => ({...d, text:text.trim()}))).filter(d => d.text);
+  function infer(key, value, details, confidence) {
+    if (fields[key].confidence || !value || !details.length) return;
+    fields[key] = {value, confidence, evidenceType:'inferred',
+      evidence:`문맥 연결 추론 · ${[...new Set(details.map(d => `${d.sourceField} (${FIELD_RULES[d.sourceField][0]})`))].join(', ')}: ${details.map(d => `“${d.text}”`).join(' / ')}`,
+      evidenceDetails:details};
+  }
+  const goals = sentences(['finalGoal','contents']).filter(d => intent.test(d.text));
+  if (goals.length) infer('purpose', goals[0].text, [goals[0]], 0.65);
+  const products = sentences(['contents','finalGoal']).filter(d => {
+    const match = output.exec(d.text);
+    if (!match) return false;
+    // The output noun must be tied to production, not merely used as an input.
+    const tail = d.text.slice(match.index + match[0].length);
+    return /^(?:을|를|의|인|과|와|및|\s|[,·])*(?:(?:시제품|제품|시스템|소프트웨어|플랫폼|모듈|보고서|데이터셋|산출물|성과물|결과물)(?:을|를|과|와|및|\s|[,·])*)*(?:개발|구축|구현|제작|제공|제출|완성|산출|출시)/.test(tail);
+  });
+  infer('deliverables', [...new Set(products.map(d => d.text))].join('\n'), products, 0.65);
+
+  // Count original evidence only: an inferred purpose must not double a term's frequency.
+  const sources = records(['projectName','purpose','contents','coreTechnology','finalGoal'])
+    .filter(d => fields[d.sourceField].evidenceType !== 'inferred');
+  const candidates = new Map();
+  for (const d of sources) {
+    const tokens = (d.text.match(/[가-힣A-Za-z][가-힣A-Za-z0-9+-]*/g) || []).map(word =>
+      word.replace(/(?:에서는|으로|에서|을|를|은|는|이|가|의|와|과|에|로)$/, ''));
+    const meaningful = word => word.length >= 2 && !keywordStops.has(word.toLowerCase()) && !/(?:한다|하고|하여|된다|하는|적인|적으로)$/.test(word);
+    for (let i=0; i<tokens.length; i++) {
+      for (const size of [1,2,3]) {
+        const words = tokens.slice(i,i+size);
+        if (words.length !== size || !words.every(meaningful)) continue;
+        const term = words.join(' '), key = term.toLowerCase();
+        const entry = candidates.get(key) || {term, count:0, details:[]};
+        entry.count++;
+        if (!entry.details.includes(d)) entry.details.push(d);
+        candidates.set(key, entry);
+      }
+    }
+  }
+  const ranked = [...candidates.values()].filter(x => x.count >= 2)
+    .sort((a,b) => b.count-a.count || b.term.length-a.term.length || a.term.localeCompare(b.term,'ko'));
+  const selected = ranked.filter(x => !ranked.some(y => y !== x && y.term.toLowerCase().includes(x.term.toLowerCase()) && y.count >= x.count)).slice(0,8);
+  infer('keywords', selected.map(x => x.term).join(', '), [...new Set(selected.flatMap(x => x.details))], 0.6);
+}
+
 function analyzeLines(lines) {
   const fields = Object.fromEntries(Object.keys(FIELD_RULES).map(k => [k, missing()]));
   function add(field, selected, type, confidence, section) {
@@ -119,7 +171,7 @@ function analyzeLines(lines) {
     if (!value || /^(?:확인 필요|미정|미기재|N\/A|[-—])$/i.test(value)) return;
     if (fields[field].confidence >= confidence) return;
     const details = useful.map(x => ({text:x.text, line:x.line, ...(x.page ? {page:x.page} : {})}));
-    fields[field] = { value, evidence: `“${value}”`, confidence, evidenceType:type,
+    fields[field] = { value, evidence: `${type === 'contextual' ? '문맥 연결 · ' : ''}“${value}”`, confidence, evidenceType:type,
       ...(section ? {section} : {}), evidenceDetails:details };
   }
   let active = null;
@@ -140,6 +192,7 @@ function analyzeLines(lines) {
     }
   }
   flush();
+  inferFields(fields);
   return fields;
 }
 function analyzeText(text, files=[]) {

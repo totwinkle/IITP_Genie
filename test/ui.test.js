@@ -12,3 +12,18 @@ test('UI displays additive confidence metadata and preserves it on edits',()=>{
  assert.equal(w.IctReview.getState().fields.purpose.evidenceDetails[0].line,2);
  dom.window.close();
 });
+
+test('UI labels inferred fields with confidence and source evidence, including legacy state',()=>{
+ const dom=new JSDOM(fs.readFileSync('public/index.html','utf8'),{url:'http://localhost/',runScripts:'outside-only'});
+ const w=dom.window;
+ const {fields}=require('../src/analyzer').analyzeDocuments([{name:'proposal.pdf',text:'최종목표: 센서 플랫폼을 개발한다.',pages:[{page:4,text:'최종목표: 센서 플랫폼을 개발한다.'}]}]);
+ fields.institution={value:'기관',evidence:'기존 저장값'};
+ w.sessionStorage.setItem('ict-review-state',JSON.stringify({fields}));
+ w.eval(fs.readFileSync('public/assist.js','utf8'));w.eval(fs.readFileSync('public/app.js','utf8'));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+ const label=w.document.querySelector('[data-field="purpose"]').parentElement.textContent;
+ assert.match(label,/추출 신뢰도 65% · 문맥 연결 추론/);
+ assert.match(label,/proposal.pdf · p. 4/);
+ assert.match(label,/finalGoal/);
+ assert.equal(w.document.querySelector('[data-field="institution"]').value,'기관');
+ dom.window.close();
+});
