@@ -6,7 +6,7 @@ const pdfParse = require('pdf-parse');
 const FIELD_RULES = {
   projectName: ['과제명','사업명','프로젝트명'], institution: ['주관기관','기관명','수행기관'],
   pi: ['연구책임자','책임자','PI'], period: ['연구기간','수행기간','사업기간'],
-  purpose: ['연구목적','목적'], contents: ['연구내용','주요내용','내용'],
+  purpose: ['연구목적','연구 목표','연구목표','개발목적','개발 목표','목적'], contents: ['연구내용','주요내용','연구 내용','내용'],
   coreTechnology: ['핵심기술','기술'], keywords: ['키워드','핵심어'],
   finalGoal: ['최종목표','최종 목표'], deliverables: ['성과물','주요성과','산출물']
 };
@@ -51,14 +51,25 @@ async function extractFile(file) {
 }
 
 function findValue(text, labels) {
-  for (const label of labels) {
+  const lines=text.split(/\n+/).map(line=>line.trim()).filter(Boolean);
+  const normalizedLabels=[...labels].sort((a,b)=>b.length-a.length);
+  for (const label of normalizedLabels) {
     const escaped = label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
     const re = new RegExp(`(?:^|\\n)\\s*${escaped}\\s*[:：]?\\s*([^\\n]{2,300})`, 'im');
     const hit = text.match(re);
     if (hit) return {value:hit[1].trim(), evidence:`“${label}: ${hit[1].trim().slice(0,90)}”`};
   }
+  for (let i=0;i<lines.length;i++) {
+    const label=normalizedLabels.find(item=>lines[i]===item || lines[i].startsWith(`${item}:`) || lines[i].startsWith(`${item}：`));
+    if (!label) continue;
+    const sameLine=lines[i].slice(label.length).replace(/^\s*[:：-]?\s*/,'').trim();
+    const following=lines.slice(i+1,i+7).filter(line=>!FIELD_LABELS.some(item=>line===item || line.startsWith(`${item}:`) || line.startsWith(`${item}：`)));
+    const value=[sameLine,...following].filter(Boolean).join(' ').trim();
+    if (value.length>=2) return {value:value.slice(0,500),evidence:`“${label}: ${value.slice(0,140)}”`};
+  }
   return {value:'확인 필요', evidence:'문서에서 명시적 근거를 찾지 못함'};
 }
+const FIELD_LABELS=Object.values(FIELD_RULES).flat();
 function analyzeText(text, files=[]) {
   const fields = {};
   Object.entries(FIELD_RULES).forEach(([key,labels]) => fields[key] = findValue(text, labels));
