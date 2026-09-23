@@ -94,7 +94,7 @@
           <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="검토할 문서 파일 선택"><div class="upload-icon" aria-hidden="true">↥</div><strong>검토할 문서를 여기에 끌어놓으세요</strong><span>PDF, DOCX, XLSX, HWPX · 파일당 15MB · 최대 12개</span><span class="upload-prompt">또는 파일 선택</span><input id="files" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.hwpx,.hwp,.txt,.json,.csv" hidden></div>
           <div id="fileList" class="file-list" aria-live="polite"></div>
           <div class="actions" id="support"><button class="primary" id="analyzeBtn">문서 분석하기</button><span class="sample-label">샘플 내려받기</span><a class="link-btn" href="/samples/sample-proposal.docx" download>DOCX</a><a class="link-btn" href="/samples/sample-proposal.xlsx" download>XLSX</a><a class="link-btn" href="/samples/sample-proposal.hwpx" download>HWPX</a><a class="link-btn" href="/samples/sample-proposal.pdf" download>PDF</a></div>
-          <div id="analysisWarning"></div>
+          <div class="assist-banner"><span class="badge">AI 검토 보조</span> AI 보조 분석 / 담당자 최종확인<p>외부 AI API 없이 로컬 규칙·단어 비교로 생성합니다. 근거 확보율은 정답 확률이 아니며 최종 결정은 담당자가 내립니다.</p></div><div id="analysisWarning"></div><div id="aiAnalysisSummary" class="assist-card" aria-live="polite"></div>
           <div id="fields" class="field-grid"></div>
         </section>
 
@@ -106,7 +106,7 @@
 
         <section id="eligibility" class="panel">
           <div class="section-title"><div><span class="step-label">02 · ELIGIBILITY REVIEW</span><h2>적격성 검토</h2><p>핵심 점검항목별 판정과 검토의견을 확인하고 직접 수정할 수 있습니다.</p></div><span class="badge gray">8개 핵심 점검</span></div>
-          <div class="table-wrap"><table><thead><tr><th>#</th><th>점검항목</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="eligibilityBody"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>점검항목 / AI 보조 근거</th><th>담당자 최종 판정</th><th>검토의견</th></tr></thead><tbody id="eligibilityBody"></tbody></table></div>
           <div class="subsection-title"><h3>우대/감점 증빙</h3><p>제출 파일명은 증빙의 존재만 나타냅니다. 인정 여부와 감점 사유는 원문을 직접 확인하세요.</p></div>
           <div class="table-wrap"><table><thead><tr><th>#</th><th>우대/감점 항목</th><th>증빙 파일</th><th>판정</th><th>검토의견</th></tr></thead><tbody id="preferenceBody"></tbody></table></div>
         </section>
@@ -117,7 +117,7 @@
           <label class="full query-field"><span>검색 질의 <i>수정 가능</i></span><textarea id="query" rows="3" placeholder="분석 결과에서 검색 질의를 생성하세요."></textarea></label>
           <div class="actions"><button class="secondary" id="generateQueryBtn">분석 결과로 질의 생성</button><button class="primary" id="searchBtn">유사과제 검색</button></div>
           <details><summary>기존 과제 수동 추가 (JSON 또는 일반 텍스트)</summary><textarea id="manualInput" rows="7" placeholder='[{"id":"LOCAL-01","name":"과제명","objective":"목표", "technology":"기술"}]&#10;&#10;또는 과제별 일반 텍스트'></textarea></details>
-          <div id="candidateList" class="candidate-list empty-state">검색 전입니다.</div>
+          <div id="aiExpandedQuery" class="assist-card"></div><div id="aiDuplicateRisk" class="assist-card"></div><div id="candidateList" class="candidate-list empty-state">검색 전입니다.</div>
           <details class="external-box"><summary>외부 연구정보 연계 데모 (선택)</summary><p class="hint">실제 외부 서비스에 접속하지 않는 인터페이스 스텁입니다. URL·ID·비밀번호는 저장되지 않으며 비밀번호는 로그에도 기록하지 않습니다.</p><div class="external-grid"><label><span>시스템 URL</span><input id="extUrl" type="url" placeholder="https://research.example.go.kr"></label><label><span>사용자 ID</span><input id="extId" autocomplete="off"></label><label><span>비밀번호</span><input id="extPassword" type="password" autocomplete="new-password"></label><button id="externalBtn" class="secondary">일회성 연결 시험</button></div><div id="externalResult" class="hint"></div></details>
         </section>
 
@@ -130,7 +130,7 @@
 
         <section id="final" class="panel final-panel">
           <div class="section-title"><div><span class="step-label">05 · FINAL REVIEW</span><h2>통합 검토 및 완료</h2><p>추출 결과, 적격성, 중복성 판단을 확인하고 최종 검토의견을 남깁니다.</p></div><span id="completionBadge" class="badge gray">작성 중</span></div>
-          <div id="reviewSummary" class="review-summary"></div>
+          <div class="assist-card"><h3>AI 종합 검토의견 초안</h3><p>현재 입력 기준으로 생성하며, 직접 수정한 내용은 유지됩니다. 입력 변경 후 수정한 초안·체크리스트도 직접 갱신하세요. 초안을 최종 의견에 반영한 뒤 확인하세요.</p><label class="full"><span>종합 의견 초안 (수정 가능)</span><textarea id="aiOpinionDraft" rows="6"></textarea></label><label class="full"><span>미해결 확인 체크리스트 (수정 가능)</span><textarea id="aiConfirmationChecklist" rows="6"></textarea></label><div class="actions"><button id="applyAiDraftBtn" class="secondary">초안을 최종 의견에 반영</button></div></div><div id="reviewSummary" class="review-summary"></div>
           <div class="reviewer-grid"><label><span>검토자명 <em>*</em></span><input id="reviewerName" required></label><label><span>부서/기관 <em>*</em></span><input id="reviewerDepartment" required></label><label class="full"><span>최종 검토의견</span><textarea id="finalComment" rows="4" placeholder="평가위원에게 전달할 최종 의견"></textarea></label></div>
           <label class="confirm"><input id="confirmReview" type="checkbox"> 모든 자동 추출 결과와 판정을 직접 확인했습니다.</label>
           <div class="finish-bar"><button id="completeBtn" class="complete">검토 완료</button><div class="downloads"><button data-format="docx" disabled>DOCX 보고서</button><button data-format="pdf" disabled>PDF 보고서</button><button data-format="html" disabled>HTML 보고서</button></div></div>
@@ -139,6 +139,7 @@
     </section>
   </main>
   <footer><div class="shell footer-inner"><div><img class="footer-ci" src="/assets/iitp-ci.svg" alt="정보통신기획평가원 IITP 공식 CI"><p>ICT R&amp;D 선정평가 사전검토 MVP</p></div><p>본 서비스는 공공 R&amp;D 사전검토를 지원하는 데모이며 특정 기관의 공식 서비스가 아닙니다.<br>모든 정보는 현재 브라우저 세션과 서버 처리 메모리에서만 사용됩니다.</p></div></footer>
+  <script src="/assist.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

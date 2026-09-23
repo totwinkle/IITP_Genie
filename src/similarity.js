@@ -15,9 +15,9 @@ function search(proposal={}, query='', manualInput='') {
   const pool=[...projects,...normalizeManual(manualInput)];
   return pool.map(p => {
     const dimensions={}; let sum=0;
-    DIMS.forEach(d => { const s=score(`${proposal[d]||''} ${query}`,p[d]); dimensions[d]=Math.round(s*100); sum+=s; });
+    DIMS.forEach(d => { const s=(proposal[d]?.trim()?score(proposal[d],p[d]):0); dimensions[d]=Math.round(s*100); sum+=s; });
     const similarity=Math.round((sum/DIMS.length)*100);
     return {...p,similarity,dimensions,reason: similarity>=60?'핵심 목적·기술의 중복 가능성이 높음':similarity>=30?'일부 기술·적용영역이 유사함':'직접 중복 근거가 제한적임'};
-  }).sort((a,b)=>b.similarity-a.similarity).slice(0,8);
+  }).sort((a,b)=>b.similarity-a.similarity||score(query,`${b.name} ${b.objective}`)-score(query,`${a.name} ${a.objective}`)).slice(0,8);
 }
 module.exports={search,DIMS};
